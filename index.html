@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARS Rota Planner</title>
+    <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-xl p-6 border border-gray-100">
+        <!-- Header -->
+        <div class="border-b pb-4 mb-6">
+            <h1 class="text-3xl font-extrabold text-slate-800">STARS Rota Generator</h1>
+            <p class="text-sm text-slate-500 mt-1">Upload your STARS availability export and define shift rules entirely in your browser.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Inputs & Rules -->
+            <div class="lg:col-span-1 space-y-6 bg-slate-50 p-4 rounded-lg border">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">1. Upload STARS CSV</label>
+                    <input type="file" id="csvFile" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="text-xs text-slate-400 mt-1">Expects columns: Name, Date, Status (Leave, Course, etc.)</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">2. Required Shifts Per Day</label>
+                    <div class="space-y-2 text-sm text-slate-600">
+                        <label class="flex justify-between items-center bg-white p-2 rounded border">
+                            <span>Morning Shift Staff Needed:</span>
+                            <input type="number" id="reqMorning" value="2" min="0" class="w-16 border rounded p-1 text-center font-bold">
+                        </label>
+                        <label class="flex justify-between items-center bg-white p-2 rounded border">
+                            <span>Late Shift Staff Needed:</span>
+                            <input type="number" id="reqLate" value="1" min="0" class="w-16 border rounded p-1 text-center font-bold">
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="processAndGenerate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow transition flex justify-center items-center gap-2">
+                    ⚡ Generate Rota
+                </button>
+            </div>
+
+            <!-- Right Column: Live Output Grid -->
+            <div class="lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-slate-800">Generated Schedule Matrix</h2>
+                    <span id="statusLabel" class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600 font-medium">Ready</span>
+                </div>
+                
+                <div class="overflow-x-auto border rounded-lg shadow-sm">
+                    <table class="min-w-full divide-y divide-gray-200" id="rotaTable">
+                        <thead class="bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Date</th>
+                                <th class="px-4 py-3 text-left">Morning Shift</th>
+                                <th class="px-4 py-3 text-left">Late Shift</th>
+                                <th class="px-4 py-3 text-left">On Leave / Course (STARS)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100 text-sm text-slate-700" id="rotaBody">
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">Upload a STARS availability file and click generate to view data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Internal structured mock database in case CSV is empty, ensuring the app functions out-of-the-box
+        let globalAvailability = [
+            { name: "Alice", date: "2026-08-10", status: "Leave", constraint: "Morning Only", preference: "Prefers Early" },
+            { name: "Bob", date: "2026-08-11", status: "Course", constraint: "Late Only", preference: "Prefers Late" },
+            { name: "Charlie", date: "2026-08-10", status: "Available", constraint: "Anytime", preference: "Prefers Early" },
+            { name: "David", date: "2026-08-10", status: "Available", constraint: "Anytime", preference: "Prefers Late" },
+            { name: "Emma", date: "2026-08-11", status: "Available", constraint: "Morning Only", preference: "Prefers Early" }
+        ];
+
+        // Handle local text file reading safely without a backend
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const text = evt.target.result;
+                parseCSVData(text);
+            };
+            reader.readAsText(file);
+        });
+
+        function parseCSVData(text) {
+            const lines = text.split('\n');
+            const parsed = [];
+            // Simple CSV Line Parser skipping header
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(',');
+                if (cols.length >= 3) {
+                    parsed.push({
+                        name: cols[0].trim(),
+                        date: cols[1].trim(),
+                        status: cols[2].trim(),
+                        constraint: cols[3] ? cols[3].trim() : "Anytime",
+                        preference: cols[4] ? cols[4].trim() : "None"
+                    });
+                }
+            }
+            if (parsed.length > 0) {
+                globalAvailability = parsed;
+                document.getElementById('statusLabel').innerText = "STARS Data Loaded Successfully";
+                document.getElementById('statusLabel').className = "text-xs px-2 py-1 rounded bg-green-100 text-green-700 font-medium";
+            }
+        }
+
+        function processAndGenerate() {
+            const reqMorning = parseInt(document.getElementById('reqMorning').value) || 0;
+            const reqLate = parseInt(document.getElementById('reqLate').value) || 0;
+            
+            // Extract distinct target dates from dataset
+            const uniqueDates = [...new Set(globalAvailability.map(item => item.date))].sort();
+            const uniqueNames = [...new Set(globalAvailability.map(item => item.name))];
+            
+            const tbody = document.getElementById('rotaBody');
+            tbody.innerHTML = ""; // Clear visual chart
+
+            uniqueDates.forEach(date => {
+                // Hard Constraints Filter: Who is physically unable to work today due to STARS?
+                const dynamicUnavailable = globalAvailability
+                    .filter(item => item.date === date && (item.status.toLowerCase() === 'leave' || item.status.toLowerCase() === 'course'))
+                    .map(item => item.name);
+
+                // Filter available pool
+                const availableStaff = uniqueNames.filter(name => !dynamicUnavailable.includes(name));
+
+                // Hard Constraint Filter 2: Fixed Contract Shifts Check
+                const morningPool = availableStaff.filter(name => {
+                    const record = globalAvailability.find(item => item.name === name && item.date === date);
+                    return !record || record.constraint !== "Late Only";
+                });
+
+                const latePool = availableStaff.filter(name => {
+                    const record = globalAvailability.find(item => item.name === name && item.date === date);
+                    return !record || record.constraint !== "Morning Only";
+                });
+
+                // Optimization Priority Sorting: Sort arrays based on staff preferences
+                morningPool.sort((a, b) => {
+                    const recA = globalAvailability.find(item => item.name === a && item.date === date);
+                    const recB = globalAvailability.find(item => item.name === b && item.date === date);
+                    const prefA = recA && recA.preference === "Prefers Early" ? 1 : 0;
+                    const prefB = recB && recB.preference === "Prefers Early" ? 1 : 0;
+                    return prefB - prefA; // Higher preference rises to top
+                });
+
+                latePool.sort((a, b) => {
+                    const recA = globalAvailability.find(item => item.name === a && item.date === date);
+                    const recB = globalAvailability.find(item => item.name === b && item.date === date);
+                    const prefA = recA && recA.preference === "Prefers Late" ? 1 : 0;
+                    const prefB = recB && recB.preference === "Prefers Late" ? 1 : 0;
+                    return prefB - prefA;
+                });
+
+                // Assign shifts based on safe counts
+                const assignedMornings = morningPool.slice(0, reqMorning);
+                
+                // Ensure no double-booking on late shift if already on morning
+                const remainingLatePool = latePool.filter(name => !assignedMornings.includes(name));
+                const assignedLates = remainingLatePool.slice(0, reqLate);
+
+                // Build Table Dynamic UI Rows
+                const row = document.createElement('tr');
