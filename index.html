@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARS Operational Rota</title>
+    <title>STARS Operational Rota (AI Scanner Enabled)</title>
     <script src="https://tailwindcss.com"></script>
+    <!-- Embeds the free Browser-Based AI Text Recognition Scanner -->
+    <script src="https://jsdelivr.net"></script>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl p-6 border border-gray-100">
@@ -13,7 +15,7 @@
         <div class="border-b pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">STARS Operational Rota</h1>
-                <p class="text-sm text-slate-500 mt-1">Priority-fills 8 core shifts. Unallocated spare staff default to a standard Day Shift.</p>
+                <p class="text-sm text-slate-500 mt-1">Take a screenshot snippet of STARS, paste it below, and the AI will extract the data.</p>
             </div>
             <button onclick="processAndGenerate()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition flex items-center gap-2 text-base">
                 ⚡ Generate Optimized Rota
@@ -21,21 +23,37 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column: Workers & Profiles Manager -->
+            <!-- Left Column: Workers & AI Snippet Input -->
             <div class="lg:col-span-1 space-y-6">
                 
-                <!-- Section 1: Upload STARS -->
+                <!-- Section 1: AI Screenshot Snippet Upload/Paste -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Import STARS Availability</h3>
-                    <input type="file" id="csvFile" accept=".csv" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                    <p class="text-xs text-slate-400">Load a CSV file with columns: <b>Name, Date, Status</b> (e.g., Leave, Course, Available).</p>
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Scan STARS Screenshot</h3>
+                    
+                    <!-- File input box -->
+                    <label class="block text-xs font-semibold text-slate-600">Upload Snippet File:</label>
+                    <input type="file" id="imageInput" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                    
+                    <!-- Interactive Clipboard Paste zone -->
+                    <div id="pasteZone" tabindex="0" class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 transition focus:border-blue-500 outline-none">
+                        <p class="text-xs text-slate-500 font-medium">Click here & press <kbd class="bg-slate-200 px-1 rounded shadow text-slate-700 font-mono">Ctrl+V</kbd> to paste a snip</p>
+                    </div>
+
+                    <!-- AI Progress Status Loader -->
+                    <div id="ocrProgress" class="text-xs font-bold text-blue-600 hidden">AI processing snippet: <span id="ocrPercent">0%</span></div>
+                    
+                    <!-- Fallback Raw text validation view -->
+                    <details class="text-xs text-slate-500">
+                        <summary class="cursor-pointer font-semibold text-slate-600 hover:text-slate-800">View Detected Extracted Text</summary>
+                        <textarea id="starsPasteArea" rows="3" placeholder="Extracted text will appear here automatically..." class="w-full mt-2 p-2 text-xs border rounded bg-slate-50 font-mono"></textarea>
+                    </details>
                 </div>
 
                 <!-- Section 2: Manage Team Profiles -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">2. Team Profiles & Skills</h3>
-                        <span id="staffCount" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">5 Staff</span>
+                        <span id="staffCount" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 Staff</span>
                     </div>
                     
                     <!-- Add Worker Form -->
@@ -80,7 +98,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-slate-700" id="rotaBody">
                             <tr>
-                                <td colspan="5" class="px-4 py-12 text-center text-slate-400 italic">Click the green "Generate Optimized Rota" button at the top to build the schedule grid...</td>
+                                <td colspan="5" class="px-4 py-12 text-center text-slate-400 italic">Upload or paste an image snippet, then click generate...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -90,7 +108,7 @@
     </div>
 
     <script>
-        // Default interactive starting roster data
+        // Roster Database
         let workerDatabase = [
             { name: "Alice", isOps: true, contractTime: "Anytime" },
             { name: "Bob", isOps: true, contractTime: "Anytime" },
@@ -104,20 +122,18 @@
             { name: "Jack", isOps: false, contractTime: "Anytime" }
         ];
 
-        let starsAbsences = [];
-
         window.onload = function() {
             renderWorkerList();
+            setupImagePaste();
         };
 
         function renderWorkerList() {
             const container = document.getElementById('workerListContainer');
             document.getElementById('staffCount').innerText = `${workerDatabase.length} Staff`;
             container.innerHTML = "";
-            
             workerDatabase.forEach((worker, index) => {
                 const card = document.createElement('div');
-                card.className = "flex justify-between items-center p-3 bg-slate-50 border rounded-lg hover:border-slate-300 transition text-xs";
+                card.className = "flex justify-between items-center p-3 bg-slate-50 border rounded-lg text-xs";
                 card.innerHTML = `
                     <div>
                         <div class="font-bold text-slate-800 flex items-center gap-1.5">
@@ -126,7 +142,7 @@
                         </div>
                         <div class="text-slate-500 mt-0.5">${worker.contractTime}</div>
                     </div>
-                    <button onclick="deleteWorker(${index})" class="text-rose-500 hover:text-rose-700 font-bold px-2 py-1">Delete</button>
+                    <button onclick="deleteWorker(${index})" class="text-rose-500 hover:text-rose-700 font-bold px-2">Delete</button>
                 `;
                 container.appendChild(card);
             });
@@ -136,50 +152,11 @@
             const nameInput = document.getElementById('newWorkerName');
             const timeSelect = document.getElementById('newWorkerTime');
             const opsCheck = document.getElementById('newWorkerOps');
-            
-            if (!nameInput.value.trim()) return alert("Please type a name.");
-            
-            workerDatabase.push({
-                name: nameInput.value.trim(),
-                isOps: opsCheck.checked,
-                contractTime: timeSelect.value
-            });
-            
-            nameInput.value = "";
-            opsCheck.checked = false;
+            if (!nameInput.value.trim()) return alert("Type a name.");
+            workerDatabase.push({ name: nameInput.value.trim(), isOps: opsCheck.checked, contractTime: timeSelect.value });
+            nameInput.value = ""; opsCheck.checked = false;
             renderWorkerList();
         }
 
-        function deleteWorker(index) {
-            workerDatabase.splice(index, 1);
-            renderWorkerList();
-        }
+        function deleteWorker(index) { workerDatabase.splice(index, 1); renderWorkerList(); }
 
-        // CSV File Reader for STARS
-        document.getElementById('csvFile').addEventListener('change', function(e) {
-            const file = e.target.files;
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const text = evt.target.result;
-                parseSTARSCSV(text);
-            };
-            reader.readAsText(file);
-        });
-
-        function parseSTARSCSV(text) {
-            const lines = text.split('\n');
-            starsAbsences = [];
-            for(let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(',');
-                if (cols.length >= 3) {
-                    const statusVal = cols[3] ? cols[3].trim().toLowerCase() : cols[2].trim().toLowerCase();
-                    if (statusVal === 'leave' || statusVal === 'course' || statusVal === 'unavailable') {
-                        starsAbsences.push({
-                            name: cols[0].trim(),
-                            date: cols[1].trim()
-                        });
-                    }
-                }
-            }
