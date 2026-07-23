@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARS Operational Rota Dashboard</title>
     <style>
-        /* All layout and design rules are written directly inside the file so the firewall cannot block them */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; display: flex; min-height: 100vh; }
-        .sidebar { w-64; width: 240px; background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); shrink-0; }
+        .sidebar { width: 240px; background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); flex-shrink: 0; }
         .sidebar h2 { margin-top: 0; margin-bottom: 5px; font-size: 18px; color: #ffffff; }
         .sidebar p { margin: 0; font-size: 11px; color: #94a3b8; margin-bottom: 25px; }
-        .nav-btn { display: block; w-full; width: 100%; text-align: left; padding: 12px; background: none; border: none; color: #94a3b8; font-weight: 600; font-size: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 8px; transition: all 0.2s; }
+        .nav-btn { display: block; width: 100%; text-align: left; padding: 12px; background: none; border: none; color: #94a3b8; font-weight: 600; font-size: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 8px; }
         .nav-btn:hover { background-color: #1e293b; color: #ffffff; }
         .nav-btn.active { background-color: #2563eb; color: #ffffff; }
         .compile-btn { margin-top: auto; width: 100%; background-color: #059669; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; text-align: center; }
         .compile-btn:hover { background-color: #047857; }
-        .main-content { flex-1; flex-grow: 1; display: flex; flex-direction: column; overflow-x: hidden; }
-        .header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 15px 25px; display: flex; justify-content: space-between; items-center: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-x: hidden; }
+        .header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .header h2 { margin: 0; font-size: 20px; color: #0f172a; }
         .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 12px; background-color: #dbeafe; color: #1e40af; font-weight: 600; border: 1px solid #bfdbfe; }
         .content-body { padding: 25px; flex-grow: 1; }
@@ -25,7 +24,7 @@
         .grid-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 1200px) { .grid-layout { grid-template-columns: 320px 1fr; } }
         .panel-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); height: fit-content; }
-        .panel-box h3 { margin-top: 0; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; border-b: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .panel-box h3 { margin-top: 0; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 5px; }
         .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; color: #1e293b; background-color: #ffffff; }
@@ -53,7 +52,7 @@
         .spare-badge { background-color: #d1fae5; color: #065f46; font-size: 12px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 500; border: 1px solid #a7f3d0; margin-bottom: 4px; }
         .out-text { color: #dc2626; font-weight: 600; }
         .vacant { color: #f87171; font-style: italic; }
-        .panel-header-inline { display: flex; justify-content: space-between; align-items: center; border-b: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+        .panel-header-inline { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
         .panel-header-inline h3 { margin: 0; border: none; padding: 0; }
         .counter { font-size: 11px; background-color: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
     </style>
@@ -132,3 +131,4 @@
                         <div class="form-group">
                             <label>Mandatory Shift Requirement:</label>
                             <select id="addContract" class="form-control">
+                                <option value="Anytime">Anytime Operational Availability</option>
