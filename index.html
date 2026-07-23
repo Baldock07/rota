@@ -5,130 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARS Operational Rota Dashboard</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; display: flex; min-height: 100vh; }
-        .sidebar { width: 240px; background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); flex-shrink: 0; }
-        .sidebar h2 { margin-top: 0; margin-bottom: 5px; font-size: 18px; color: #ffffff; }
-        .sidebar p { margin: 0; font-size: 11px; color: #94a3b8; margin-bottom: 25px; }
-        .nav-btn { display: block; width: 100%; text-align: left; padding: 12px; background: none; border: none; color: #94a3b8; font-weight: 600; font-size: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 8px; }
-        .nav-btn:hover { background-color: #1e293b; color: #ffffff; }
-        .nav-btn.active { background-color: #2563eb; color: #ffffff; }
-        .compile-btn { margin-top: auto; width: 100%; background-color: #059669; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; text-align: center; }
-        .compile-btn:hover { background-color: #047857; }
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-x: hidden; }
-        .header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .header h2 { margin: 0; font-size: 20px; color: #0f172a; }
-        .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 12px; background-color: #dbeafe; color: #1e40af; font-weight: 600; border: 1px solid #bfdbfe; }
-        .content-body { padding: 25px; flex-grow: 1; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 1200px) { .grid-layout { grid-template-columns: 320px 1fr; } }
-        .panel-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); height: fit-content; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 20px; }
+        .dashboard-container { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
+        @media (min-width: 1024px) { .dashboard-container { grid-template-columns: 340px 1fr; } }
+        
+        /* Left Column Styles */
+        .left-col { display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Panel Boxes */
+        .panel-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .panel-box h3 { margin-top: 0; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
+        
+        /* Form controls */
+        .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 5px; }
         .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; color: #1e293b; background-color: #ffffff; }
-        .form-control:focus { outline: none; border-color: #2563eb; }
-        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 15px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; }
-        .submit-btn { width: 100%; background-color: #1e293b; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 10px; }
-        .submit-btn:hover { background-color: #334155; }
-        .registry-container { display: grid; grid-template-columns: 1fr; gap: 15px; max-height: 550px; overflow-y: auto; padding-right: 5px; }
-        @media (min-width: 768px) { .registry-container { grid-template-columns: 1fr 1fr; } }
-        .personnel-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; position: relative; }
-        .personnel-name { font-size: 16px; font-weight: bold; color: #0f172a; display: flex; align-items: center; gap: 6px; }
-        .badge-ops { background-color: #dbeafe; color: #1e40af; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800; border: 1px solid #bfdbfe; }
-        .card-details { margin-top: 8px; font-size: 12px; color: #475569; }
-        .card-details div { margin-bottom: 3px; }
-        .remove-btn { background: none; border: none; color: #dc2626; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0 0 0; margin-top: 10px; display: block; text-align: right; width: 100%; border-top: 1px dashed #e2e8f0; }
-        .remove-btn:hover { color: #991b1b; }
-        .table-wrapper { width: 100%; overflow-x: auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin: 15px 0; font-size: 13px; font-weight: 600; color: #334155; }
+        
+        /* Buttons */
+        .action-btn { width: 100%; background-color: #1e293b; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .action-btn:hover { background-color: #334155; }
+        .compile-btn { width: 100%; background-color: #059669; color: white; border: none; padding: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 15px; margin-bottom: 10px; text-transform: uppercase; tracking-spacing: 0.5px; }
+        .compile-btn:hover { background-color: #047857; }
+        
+        /* Registry list */
+        .registry-list { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .personnel-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 12px; }
+        .personnel-name { font-size: 14px; font-weight: bold; color: #0f172a; display: flex; align-items: center; gap: 6px; }
+        .badge-ops { background-color: #dbeafe; color: #1e40af; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: 800; border: 1px solid #bfdbfe; }
+        .remove-link { color: #dc2626; text-decoration: none; font-weight: bold; font-size: 11px; cursor: pointer; display: inline-block; margin-top: 5px; }
+        
+        /* Right Table Styles */
+        .right-col { display: flex; flex-direction: column; gap: 20px; }
+        .table-wrapper { width: 100%; overflow-x: auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .rota-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        .rota-table th { background-color: #1e293b; color: #ffffff; padding: 12px; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .rota-table th { background-color: #1e293b; color: #ffffff; padding: 12px; font-weight: 600; text-transform: uppercase; font-size: 11px; }
         .rota-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
-        .rota-table tr:hover { background-color: #f8fafc; }
         .shift-block b { color: #2563eb; }
         .shift-block.sts2 b { color: #d97706; }
         .shift-block.sts3 b { color: #7c3aed; }
-        .spare-badge { background-color: #d1fae5; color: #065f46; font-size: 12px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 500; border: 1px solid #a7f3d0; margin-bottom: 4px; }
+        .spare-badge { background-color: #d1fae5; color: #065f46; font-size: 12px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 500; border: 1px solid #a7f3d0; }
         .out-text { color: #dc2626; font-weight: 600; }
         .vacant { color: #f87171; font-style: italic; }
-        .panel-header-inline { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
-        .panel-header-inline h3 { margin: 0; border: none; padding: 0; }
-        .counter { font-size: 11px; background-color: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+        .counter { font-size: 11px; background-color: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 10px; font-weight: bold; float: right; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR NAVIGATION MENU -->
-    <div class="sidebar">
-        <h2>STARS Rota Panel</h2>
-        <p>Operational Control Center</p>
+    <div class="dashboard-container">
         
-        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn active">📊 Rota Grid Dashboard</button>
-        <button onclick="switchTab('personnel')" id="btn-personnel" class="nav-btn">👥 Personnel Database</button>
-        
-        <button onclick="processAndGenerate()" class="compile-btn">⚡ Compile Rota Now</button>
-    </div>
-
-    <!-- MAIN INTERACTIVE CONTENT AREA -->
-    <div class="main-content">
-        <header class="header">
-            <h2 id="currentTabTitle">Rota Grid Dashboard</h2>
-            <span id="statusLabel" class="status-badge">System Ready</span>
-        </header>
-
-        <main class="content-body">
+        <!-- LEFT COLUMN: ALL PERSONNEL MANAGEMENT CONTROLS (ALWAYS VISIBLE) -->
+        <div class="left-col">
             
-            <!-- TAB 1: ROTA GRID DASHBOARD CONTAINER -->
-            <div id="tab-dashboard" class="tab-content active">
-                <div class="grid-layout">
-                    <!-- Left Inputs Panel -->
-                    <div class="panel-box">
-                        <h3>1. Input STARS Absences</h3>
-                        <div class="form-group">
-                            <label>Type or paste absences here:</label>
-                            <textarea id="starsPasteArea" rows="8" class="form-control" style="font-family: monospace; resize: vertical;" placeholder="Type line by line, example:&#10;Alice Leave&#10;Bob Course"></textarea>
-                        </div>
-                        <p style="font-size: 11px; color: #64748b; margin: 0; line-height: 1.4;">
-                            * Type an active staff member's name followed by a status word like <b>Leave</b> or <b>Course</b>. The engine reads the text directly.
-                        </p>
-                    </div>
+            <!-- Trigger Button -->
+            <button onclick="processAndGenerate()" class="compile-btn">⚡ Compile Rota Grid</button>
 
-                    <!-- Right Outputs Table Matrix -->
-                    <div class="table-wrapper">
-                        <table class="rota-table" id="rotaTable">
-                            <thead>
-                                <tr>
-                                    <th style="width: 140px;">Day Name</th>
-                                    <th>Ops Shifts</th>
-                                    <th>STS2 Shifts</th>
-                                    <th>STS3 Shifts</th>
-                                    <th>Spares / Unavailable</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rotaBody">
-                                <tr>
-                                    <td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-style: italic;">
-                                        Click the green "Compile Rota Now" button on the left sidebar to generate the schedule grid view...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- Add Member Panel -->
+            <div class="panel-box">
+                <h3>Register Roster Personnel</h3>
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" id="addName" placeholder="e.g. John Doe" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Mandatory Shift Requirement:</label>
+                    <select id="addContract" class="form-control">
+                        <option value="Anytime">Anytime Operational</option>
+                        <option value="Mornings Only">Required Mornings Only</option>
+                        <option value="Lates Only">Required Lates Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Soft Preference Choice:</label>
+                    <select id="addPreference" class="form-control">
+                        <option value="None">No Preference</option>
+                        <option value="Prefers Early">Prefers Early Shifts</option>
+                        <option value="Prefers Late">Prefers Late Shifts</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="addOps" style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="addOps" style="cursor: pointer;">Certified Ops Trained</label>
+                </div>
+                <button onclick="createNewRosterProfile()" class="action-btn">Add Profile to System</button>
+            </div>
+
+            <!-- Active Registry List Panel -->
+            <div class="panel-box">
+                <h3>Active Registry <span id="registryCounter" class="counter">0 Active</span></h3>
+                <div id="personnelRegistryContainer" class="registry-list">
+                    <!-- Loaded dynamically via JavaScript array -->
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- RIGHT COLUMN: ABSENCES AND OUTPUT MATRIX GRID (ALWAYS VISIBLE) -->
+        <div class="right-col">
+            
+            <!-- Absences Input Box -->
+            <div class="panel-box">
+                <h3>1. Input STARS Absences</h3>
+                <div class="form-group">
+                    <label>Type or paste absences here (one name + status per line):</label>
+                    <textarea id="starsPasteArea" rows="4" class="form-control" style="font-family: monospace; resize: vertical;" placeholder="Alice Leave&#10;Bob Course"></textarea>
                 </div>
             </div>
 
-            <!-- TAB 2: PERSONNEL MANAGEMENT DATABASE -->
-            <div id="tab-personnel" class="tab-content">
-                <div class="grid-layout">
-                    <!-- Add Profile Box -->
-                    <div class="panel-box">
-                        <h3>Register New Roster Member</h3>
-                        <div class="form-group">
-                            <label>Full Name:</label>
-                            <input type="text" id="addName" placeholder="e.g. John Doe" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Mandatory Shift Requirement:</label>
-                            <select id="addContract" class="form-control">
-                                <option value="Anytime">Anytime Operational Availability</option>
+            <!-- Rota Output Matrix -->
+            <div class="table-wrapper">
+                <table class="rota-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">Day Name</th>
+                            <th>Ops Shifts</th>
+                            <th>STS2 Shifts</th>
+                            <th>STS3 Shifts</th>
+                            <th>Spares / Unavailable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rotaBody">
+                        <tr>
+                            <td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-style: italic;">
+                                Enter absences above, manage personnel on the left, and click "Compile Rota Grid" to view the schedule matrix...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <script>
+        // Baseline active staff tracking array database parameters
+        let personnelRosterDatabase = [
+            { name: "Alice", isOps: true, contract: "Anytime", preference: "Prefers Early" },
+            { name: "Bob", isOps: true, contract: "Anytime", preference: "Prefers Late" },
+            { name: "Charlie", isOps: false, contract: "Mornings Only", preference: "Prefers Early" },
+            { name: "David", isOps: false, contract: "Lates Only", preference: "Prefers Late" },
+            { name: "Emma", isOps: false, contract: "Anytime", preference: "None" },
+            { name: "Frank", isOps: false, contract: "Anytime", preference: "None" },
+            { name: "Grace", isOps: false, contract: "Anytime", preference: "None" },
+            { name: "Harry", isOps: false, contract: "Anytime", preference: "None" },
+            { name: "Ivy", isOps: false, contract: "Anytime", preference: "None" },
+            { name: "Jack", isOps: false, contract: "Anytime", preference: "None" }
+        ];
+
+        window.onload = function() {
+            renderPersonnelRegistry();
+            document.getElementById('starsPasteArea').value = "Alice Leave\nBob Course";
+        };
+
+        function renderPersonnelRegistry() {
+            const container = document.getElementById('personnelRegistryContainer');
+            document.getElementById('registryCounter').innerText = `${personnelRosterDatabase.length} Active`;
+            container.innerHTML = "";
+
+            personnelRosterDatabase.forEach((worker, index) => {
+                const card = document.createElement('div');
+                card.className = "personnel-card";
+                card.innerHTML = `
+                    <div class="personnel-name">
