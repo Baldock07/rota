@@ -3,160 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARS Operational Rota (AI Scanner Enabled)</title>
+    <title>STARS Control Dashboard</title>
     <script src="https://tailwindcss.com"></script>
-    <!-- Embeds the free Browser-Based AI Text Recognition Scanner -->
     <script src="https://jsdelivr.net"></script>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen p-4 md:p-8">
-    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl p-6 border border-gray-100">
-        
-        <!-- Header -->
-        <div class="border-b pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">STARS Operational Rota</h1>
-                <p class="text-sm text-slate-500 mt-1">Take a screenshot snippet of STARS, paste it below, and the AI will extract the data.</p>
-            </div>
-            <button onclick="processAndGenerate()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition flex items-center gap-2 text-base">
-                ⚡ Generate Optimized Rota
-            </button>
+<body class="bg-slate-100 font-sans min-h-screen flex">
+
+    <!-- SIDEBAR NAVIGATION MENU -->
+    <div class="w-64 bg-slate-900 text-slate-100 flex flex-col min-h-screen shadow-xl shrink-0">
+        <div class="p-5 border-b border-slate-800">
+            <h2 class="text-lg font-bold tracking-tight text-white">STARS Rota Panel</h2>
+            <p class="text-xs text-slate-400 mt-1">Operational Control Center</p>
         </div>
+        
+        <nav class="flex-1 p-4 space-y-1.5">
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white">
+                📊 Rota Grid Dashboard
+            </button>
+            <button onclick="switchTab('personnel')" id="btn-personnel" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
+                👥 Personnel Database
+            </button>
+        </nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column: Workers & AI Snippet Input -->
-            <div class="lg:col-span-1 space-y-6">
-                
-                <!-- Section 1: AI Screenshot Snippet Upload/Paste -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Scan STARS Screenshot</h3>
-                    
-                    <!-- File input box -->
-                    <label class="block text-xs font-semibold text-slate-600">Upload Snippet File:</label>
-                    <input type="file" id="imageInput" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                    
-                    <!-- Interactive Clipboard Paste zone -->
-                    <div id="pasteZone" tabindex="0" class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 transition focus:border-blue-500 outline-none">
-                        <p class="text-xs text-slate-500 font-medium">Click here & press <kbd class="bg-slate-200 px-1 rounded shadow text-slate-700 font-mono">Ctrl+V</kbd> to paste a snip</p>
-                    </div>
-
-                    <!-- AI Progress Status Loader -->
-                    <div id="ocrProgress" class="text-xs font-bold text-blue-600 hidden">AI processing snippet: <span id="ocrPercent">0%</span></div>
-                    
-                    <!-- Fallback Raw text validation view -->
-                    <details class="text-xs text-slate-500">
-                        <summary class="cursor-pointer font-semibold text-slate-600 hover:text-slate-800">View Detected Extracted Text</summary>
-                        <textarea id="starsPasteArea" rows="3" placeholder="Extracted text will appear here automatically..." class="w-full mt-2 p-2 text-xs border rounded bg-slate-50 font-mono"></textarea>
-                    </details>
-                </div>
-
-                <!-- Section 2: Manage Team Profiles -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">2. Team Profiles & Skills</h3>
-                        <span id="staffCount" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 Staff</span>
-                    </div>
-                    
-                    <!-- Add Worker Form -->
-                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-dashed">
-                        <input type="text" id="newWorkerName" placeholder="Worker Name" class="p-2 border rounded bg-white">
-                        <select id="newWorkerTime" class="p-2 border rounded bg-white">
-                            <option value="Anytime">Anytime Required</option>
-                            <option value="Mornings Only">Mornings Only</option>
-                            <option value="Lates Only">Lates Only</option>
-                        </select>
-                        <label class="col-span-2 flex items-center gap-2 p-1 text-slate-600 cursor-pointer">
-                            <input type="checkbox" id="newWorkerOps" class="rounded text-blue-600 w-4 h-4">
-                            <span>Is Ops Trained?</span>
-                        </label>
-                        <button onclick="addWorkerProfile()" class="col-span-2 bg-slate-800 text-white font-bold p-2 rounded hover:bg-slate-700 transition">Add Member</button>
-                    </div>
-
-                    <!-- Interactive Worker List -->
-                    <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="workerListContainer">
-                        <!-- Dynamic workers injected here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Live Output Grid Matrix -->
-            <div class="lg:col-span-2 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-slate-800">Generated Schedule Grid</h2>
-                    <span id="statusLabel" class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700 font-medium border border-amber-200">Awaiting Generation</span>
-                </div>
-                
-                <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm" id="rotaTable">
-                        <thead class="bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Date</th>
-                                <th class="px-4 py-3 text-left">Ops Shifts</th>
-                                <th class="px-4 py-3 text-left">STS2 Shifts</th>
-                                <th class="px-4 py-3 text-left">STS3 Shifts</th>
-                                <th class="px-4 py-3 text-left">Spares / Unavailable</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-slate-700" id="rotaBody">
-                            <tr>
-                                <td colspan="5" class="px-4 py-12 text-center text-slate-400 italic">Upload or paste an image snippet, then click generate...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="processAndGenerate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition text-sm">
+                ⚡ Compile Rota Now
+            </button>
         </div>
     </div>
 
-    <script>
-        // Roster Database
-        let workerDatabase = [
-            { name: "Alice", isOps: true, contractTime: "Anytime" },
-            { name: "Bob", isOps: true, contractTime: "Anytime" },
-            { name: "Charlie", isOps: false, contractTime: "Mornings Only" },
-            { name: "David", isOps: false, contractTime: "Lates Only" },
-            { name: "Emma", isOps: false, contractTime: "Anytime" },
-            { name: "Frank", isOps: false, contractTime: "Anytime" },
-            { name: "Grace", isOps: false, contractTime: "Anytime" },
-            { name: "Harry", isOps: false, contractTime: "Anytime" },
-            { name: "Ivy", isOps: false, contractTime: "Anytime" },
-            { name: "Jack", isOps: false, contractTime: "Anytime" }
-        ];
+    <!-- MAIN INTERACTIVE CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+        
+        <!-- HEADER STATUS BAR -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
+            <h2 id="currentTabTitle" class="text-xl font-bold text-slate-800">Rota Grid Dashboard</h2>
+            <span id="statusLabel" class="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">System Ready</span>
+        </header>
 
-        window.onload = function() {
-            renderWorkerList();
-            setupImagePaste();
-        };
-
-        function renderWorkerList() {
-            const container = document.getElementById('workerListContainer');
-            document.getElementById('staffCount').innerText = `${workerDatabase.length} Staff`;
-            container.innerHTML = "";
-            workerDatabase.forEach((worker, index) => {
-                const card = document.createElement('div');
-                card.className = "flex justify-between items-center p-3 bg-slate-50 border rounded-lg text-xs";
-                card.innerHTML = `
-                    <div>
-                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
-                            ${worker.name}
-                            ${worker.isOps ? '<span class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.2 rounded font-bold border border-blue-200">OPS</span>' : ''}
+        <!-- CONTAINER CONTENT BOX -->
+        <main class="flex-1 p-6">
+            
+            <!-- TAB 1: ROTA GRID DASHBOARD CONTAINER -->
+            <div id="tab-dashboard" class="space-y-6">
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Left: AI Image Input Controller -->
+                    <div class="xl:col-span-1 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Scan STARS Screenshot</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Select Screenshot File:</label>
+                            <input type="file" id="imageInput" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                         </div>
-                        <div class="text-slate-500 mt-0.5">${worker.contractTime}</div>
+                        <div id="pasteZone" tabindex="0" class="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 transition outline-none">
+                            <p class="text-xs text-slate-500 font-medium">Click here & press <kbd class="bg-slate-200 px-1 rounded shadow text-slate-600 font-mono">Ctrl+V</kbd> to paste a snip</p>
+                        </div>
+                        <div id="ocrProgress" class="text-xs font-bold text-blue-600 hidden animate-pulse">AI Scanning Image Context: <span id="ocrPercent">0%</span></div>
+                        
+                        <details class="text-xs text-slate-400">
+                            <summary class="cursor-pointer hover:text-slate-600 font-medium">Verify AI Extracted Text Output</summary>
+                            <textarea id="starsPasteArea" rows="4" placeholder="Extracted character text will populate here..." class="w-full mt-2 p-2 border rounded bg-slate-50 font-mono text-slate-700"></textarea>
+                        </details>
                     </div>
-                    <button onclick="deleteWorker(${index})" class="text-rose-500 hover:text-rose-700 font-bold px-2">Delete</button>
-                `;
-                container.appendChild(card);
-            });
-        }
 
-        function addWorkerProfile() {
-            const nameInput = document.getElementById('newWorkerName');
-            const timeSelect = document.getElementById('newWorkerTime');
-            const opsCheck = document.getElementById('newWorkerOps');
-            if (!nameInput.value.trim()) return alert("Type a name.");
-            workerDatabase.push({ name: nameInput.value.trim(), isOps: opsCheck.checked, contractTime: timeSelect.value });
-            nameInput.value = ""; opsCheck.checked = false;
-            renderWorkerList();
-        }
+                    <!-- Right: Schedule Outputs Matrix Table Grid -->
+                    <div class="xl:col-span-2 space-y-4">
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm" id="rotaTable">
+                                <thead class="bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Date</th>
+                                        <th class="px-4 py-3 text-left">Ops Shifts</th>
+                                        <th class="px-4 py-3 text-left">STS2 Shifts</th>
+                                        <th class="px-4 py-3 text-left">STS3 Shifts</th>
+                                        <th class="px-4 py-3 text-left">Spares / Unavailable</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700 bg-white" id="rotaBody">
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-16 text-center text-slate-400 italic">Upload an image or paste a screenshot, then run the compiler to build the grid.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        function deleteWorker(index) { workerDatabase.splice(index, 1); renderWorkerList(); }
+            <!-- TAB 2: PERSONNEL MANAGEMENT REGISTRY PANEL -->
+            <div id="tab-personnel" class="hidden grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Add New Personnel Profile Form -->
+                <div class="xl:col-span-1 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 h-fit">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Register New Roster Member</h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Full Name:</label>
+                            <input type="text" id="addName" placeholder="e.g. John Doe" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Mandatory Shift Assignment Block:</label>
+                            <select id="addContract" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-blue-500 outline-none bg-white">
+                                <option value="Anytime">Anytime Operational Availability</option>
+                                <option value="Mornings Only">Required Mornings Only</option>
+                                <option value="Lates Only">Required Lates Only</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Soft Preference Choice (Accommodated if possible):</label>
+                            <select id="addPreference" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-blue-500 outline-none bg-white">
+                                <option value="None">No Shift Preference</option>
+                                <option value="Prefers Early">Prefers Early Shifts</option>
+                                <option value="Prefers Late">Prefers Late Shifts</option>
+                            </select>
+                        </div>
+                        <label class="flex items-center gap-2.5 p-1 text-slate-700 font-medium cursor-pointer">
+                            <input type="checkbox" id="addOps" class="rounded text-blue-600 w-4.5 h-4.5 border-slate-300">
+                            <span>Certified Ops Trained Specialist</span>
+                        </label>
+                        <button onclick="createNewRosterProfile()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg shadow transition mt-2">
+                            Add Profile to System
+                        </button>
+                    </div>
+                </div>
 
+                <!-- Database Card Grid Lists -->
+                <div class="xl:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Active Service Personnel Registry</h3>
+                        <span id="registryCounter" class="text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-0.5 rounded-full border">0 Active</span>
+                    </div>
+                    <div id="personnelRegistryContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-1">
+                        <!-- Custom dynamic worker structural database profile panels loaded here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Core structural system state tracking preloaded parameters database
+        let personnelRosterDatabase = [
+            { name: "Alice", isOps: true, contract: "Anytime", preference: "Prefers Early" },
+            { name: "Bob", isOps: true, contract: "Anytime", preference: "Prefers Late" },
