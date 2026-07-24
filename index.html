@@ -18,131 +18,125 @@
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
         h1, h2, h3 { margin: 0 0 10px 0; }
         
-        /* Tabs Framework */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
-        .tab-btn { padding: 10px 20px; border: 1px solid transparent; background: none; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 4px 4px 0 0; color: var(--dark); }
-        .tab-btn.active { background: white; border: 1px solid var(--border); border-bottom-color: white; margin-bottom: -1px; color: var(--primary); }
-        .tab-content { display: none; background: white; padding: 20px; border-radius: 6px; border: 1px solid var(--border); min-height: 400px; }
-        .tab-content.active { display: block; }
-
-        /* Forms & Grid System */
-        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        /* Master Layout - 3 Distinct Columns All Visible At Once */
+        .master-grid { display: grid; grid-template-columns: 320px 320px 1fr; gap: 20px; align-items: start; }
+        .panel { background: white; padding: 20px; border-radius: 6px; border: 1px solid var(--border); min-height: 500px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* Forms styling */
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input[type="text"], select, textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
-        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-        .checkbox-group input { width: 18px; height: 18px; }
-        button.btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+        .checkbox-group input { width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-group label { font-size: 13px; font-weight: bold; cursor: pointer; }
+        button.btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
         button.btn-main:hover { background: #004085; }
 
-        /* Personnel Registry Styling */
-        .registry-container { max-height: 450px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; padding: 10px; background: var(--light); }
-        .person-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 4px; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* Personnel Registry Wrapper */
+        .registry-container { max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; padding: 8px; background: var(--light); margin-top: 10px; }
+        .person-card { background: white; padding: 10px; margin-bottom: 8px; border-radius: 4px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .person-card.ops-capable { border-left-color: var(--success); }
-        .person-details div { font-size: 12px; color: #666; margin-top: 3px; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .person-details { font-size: 12px; }
+        .person-details div { color: #666; font-size: 11px; margin-top: 2px; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        /* Configuration Panel */
-        .config-box { background: var(--light); padding: 15px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+        /* Options Panel Box */
+        .config-box { background: var(--light); padding: 12px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 15px; }
 
-        /* Schedule Matrix Output Table */
-        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 12px; text-align: left; font-size: 14px; }
-        .matrix-table th { background-color: #f1f3f5; font-weight: bold; }
+        /* Matrix Output Styling */
+        .matrix-scroll { max-height: 750px; overflow-y: auto; padding-right: 5px; }
+        .matrix-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background: white; }
+        .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 10px; text-align: left; font-size: 13px; }
+        .matrix-table th { background-color: #f1f3f5; font-weight: bold; color: var(--dark); }
         .matrix-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .shift-tag { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; }
+        .shift-tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: white; text-transform: uppercase; }
         .tag-ops { background-color: #e67e22; }
         .tag-sts2 { background-color: #2980b9; }
         .tag-sts3 { background-color: #8e44ad; }
         .tag-standard { background-color: #7f8c8d; }
-        .tag-absent { background-color: var(--danger); }
     </style>
 </head>
 <body>
 
     <header>
         <h1>STARS Operational Rota Dashboard</h1>
-        <button id="globalCompileBtn" class="btn-main" style="background: var(--success); font-size: 16px; padding: 12px 25px;">⚡ Compile Rota Grid</button>
+        <button id="globalCompileBtn" class="btn-main" style="background: var(--success); font-size: 16px; padding: 12px 25px; width: auto;">⚡ Compile Rota Grid</button>
     </header>
 
-    <div class="tabs">
-        <button id="btn-rota" class="tab-btn active">📅 Rota Matrix Generator</button>
-        <button id="btn-personnel" class="tab-btn">👥 Manage Personnel</button>
-    </div>
+    <div class="master-grid">
+        
+        <!-- COLUMN 1: PERSONNEL MANAGEMENT -->
+        <div class="panel">
+            <h3>👥 Manage Personnel</h3>
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" placeholder="e.g. John Doe">
+            </div>
+            <div class="form-group">
+                <label for="mandatoryReq">Shift Constraint (Hard Rule):</label>
+                <select id="mandatoryReq">
+                    <option value="Anytime">Anytime Operational</option>
+                    <option value="Mornings">Required Mornings Only</option>
+                    <option value="Lates">Required Lates Only</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="softPref">Preferences (Soft Accommodation):</label>
+                <select id="softPref">
+                    <option value="None">No Preference</option>
+                    <option value="Early">Prefers Early Shifts</option>
+                    <option value="Late">Prefers Late Shifts</option>
+                </select>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="isOpsTrained">
+                <label for="isOpsTrained">Certified Ops Trained</label>
+            </div>
+            <button id="addProfileBtn" class="btn-main">Add Profile to System</button>
 
-    <!-- TAB 1: ROTA GENERATOR -->
-    <div id="rota-tab" class="tab-content active">
-        <div class="config-box">
-            <h3 style="width:100%; margin:0 0 5px 0;">Rota Options & Constraints</h3>
-            <div class="checkbox-group">
-                <input type="checkbox" id="reqFridayLates">
-                <label for="reqFridayLates">Are Friday Lates Required?</label>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="reqSts2Sim4">
-                <label for="reqSts2Sim4">Require STS2 SIM 4 (1845Z-2145Z)?</label>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="reqSts3Sim4">
-                <label for="reqSts3Sim4">Require STS3 SIM 4 (1930Z-2230Z)?</label>
-            </div>
+            <h4 style="margin: 20px 0 5px 0;">Active Registry (<span id="registryCount">0</span>)</h4>
+            <div id="registryList" class="registry-container"></div>
         </div>
 
-        <div class="grid-2">
-            <div>
-                <h3>1. Input STARS Absences</h3>
-                <p style="font-size:12px; color:#666; margin-top:-5px;">Paste text rows containing names of people who are on leave/courses here (One name per line):</p>
+        <!-- COLUMN 2: ABSENCES & MODIFIERS -->
+        <div class="panel">
+            <h3>⚙️ Conditions & Absences</h3>
+            
+            <div class="config-box">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px;">Operational Modifiers</h4>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reqFridayLates">
+                    <label for="reqFridayLates">Are Friday Lates Required?</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reqSts2Sim4">
+                    <label for="reqSts2Sim4">Require STS2 SIM 4?</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reqSts3Sim4">
+                    <label for="reqSts3Sim4">Require STS3 SIM 4?</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="absenceInput">Input STARS Absences:</label>
+                <p style="font-size:11px; color:#666; margin: 0 0 8px 0;">Paste text strings directly from STARS showing staff on leave/courses (One full name per line):</p>
                 <textarea id="absenceInput" rows="12" placeholder="Example:&#10;John Doe&#10;Jane Smith"></textarea>
             </div>
-            <div>
-                <h3>2. Daily Generated Rota</h3>
-                <div id="matrixOutputContainer">
-                    <p style="color:#666; font-style:italic;">Configure personnel and click "Compile Rota Grid" to build the matrix...</p>
-                </div>
-            </div>
         </div>
-    </div>
 
-    <!-- TAB 2: PERSONNEL MANAGEMENT -->
-    <div id="personnel-tab" class="tab-content">
-        <div class="grid-2">
-            <div>
-                <h3>Register Roster Personnel</h3>
-                <div class="form-group">
-                    <label for="fullName">Full Name:</label>
-                    <input type="text" id="fullName" placeholder="e.g. John Doe">
-                </div>
-                <div class="form-group">
-                    <label for="mandatoryReq">Mandatory Shift Requirement (Hard Restriction):</label>
-                    <select id="mandatoryReq">
-                        <option value="Anytime">Anytime Operational</option>
-                        <option value="Mornings">Required Mornings Only</option>
-                        <option value="Lates">Required Lates Only</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="softPref">Soft Preference Choice:</label>
-                    <select id="softPref">
-                        <option value="None">No Preference</option>
-                        <option value="Early">Prefers Early Shifts</option>
-                        <option value="Late">Prefers Late Shifts</option>
-                    </select>
-                </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="isOpsTrained">
-                    <label for="isOpsTrained">Certified Ops Trained</label>
-                </div>
-                <button id="addProfileBtn" class="btn-main" style="width:100%; margin-top:10px;">Add Profile to System</button>
-            </div>
-            <div>
-                <h3>Active Registry (<span id="registryCount">0</span> Active)</h3>
-                <div id="registryList" class="registry-container"></div>
+        <!-- COLUMN 3: OUTPUT MATRIX RESULTS -->
+        <div class="panel">
+            <h3>📅 Weekly Generated Matrix</h3>
+            <div id="matrixOutputContainer" class="matrix-scroll">
+                <p style="color:#666; font-style:italic;">Configure metrics in columns 1 & 2 and click "Compile Rota Grid" to view your weekly allocations...</p>
             </div>
         </div>
+
     </div>
 
     <script>
-        // Store configuration completely decoupled from HTML text structures
+        // Internal personnel register storage bank
         let roster = JSON.parse(localStorage.getItem('stars_roster')) || [
             { id: 1, name: "Alex Mercer", mandatory: "Anytime", preference: "Early", opsTrained: true },
             { id: 2, name: "Sarah Connor", mandatory: "Mornings", preference: "None", opsTrained: true },
@@ -156,21 +150,32 @@
 
         const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-        // Pure JS Declarations — Completely bypassing corporate script security filters
-        document.getElementById('btn-rota').addEventListener('click', function() {
-            setTabActive('btn-rota', 'rota-tab');
-        });
+        // Secure add profile tracking sequence
+        document.getElementById('addProfileBtn').addEventListener('click', function() {
+            const nameInput = document.getElementById('fullName');
+            const name = nameInput.value.trim();
+            const mandatory = document.getElementById('mandatoryReq').value;
+            const preference = document.getElementById('softPref').value;
+            const opsTrained = document.getElementById('isOpsTrained').checked;
 
-        document.getElementById('btn-personnel').addEventListener('click', function() {
-            setTabActive('btn-personnel', 'personnel-tab');
-        });
+            if (!name) {
+                alert("Please enter a valid full name.");
+                return;
+            }
 
-        function setTabActive(btnId, contentId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            roster.push({ id: Date.now(), name, mandatory, preference, opsTrained });
+            localStorage.setItem('stars_roster', JSON.stringify(roster));
+            renderPersonnel();
             
-            document.getElementById(btnId).classList.add('active');
-            document.getElementById(contentId).classList.add('active');
-        }
+            nameInput.value = '';
+            document.getElementById('mandatoryReq').value = 'Anytime';
+            document.getElementById('softPref').value = 'None';
+            document.getElementById('isOpsTrained').checked = false;
+        });
 
-        // Add Profile Logic
+        // Zero-Inline script render pipeline
+        function renderPersonnel() {
+            const container = document.getElementById('registryList');
+            document.getElementById('registryCount').innerText = roster.length;
+            container.innerHTML = '';
+
