@@ -66,8 +66,8 @@
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('rota-tab')">📅 Rota Matrix Generator</button>
-        <button class="tab-btn" onclick="switchTab('personnel-tab')">👥 Manage Personnel</button>
+        <button id="btn-rota" class="tab-btn active">📅 Rota Matrix Generator</button>
+        <button id="btn-personnel" class="tab-btn">👥 Manage Personnel</button>
     </div>
 
     <!-- TAB 1: ROTA GENERATOR -->
@@ -159,14 +159,14 @@
 
         const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-        // Tab Switching Logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
+        // Secure Tab Event Listeners (Bypasses restriction errors)
+        document.getElementById('btn-rota').addEventListener('click', function() {
+            setTabActive('btn-rota', 'rota-tab');
+        });
 
-        // Personnel Management Logic
-        document.getElementById('addProfileBtn').addEventListener('click', () => {
+        document.getElementById('btn-personnel').addEventListener('click', function() {
+            setTabActive('btn-personnel', 'personnel-tab');
+        });
+
+        function setTabActive(btnId, contentId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
