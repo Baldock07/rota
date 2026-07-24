@@ -2,68 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARS Operational Rota Dashboard</title>
     <style>
-        :root { --primary: #0056b3; --success: #28a745; --dark: #343a40; --light: #f8f9fa; --border: #dee2e6; }
-        body { font-family: sans-serif; margin: 0; padding: 20px; background-color: var(--light); }
-        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-        .grid-container { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-        .panel { background: white; padding: 20px; border-radius: 6px; border: 1px solid var(--border); }
-        .btn-compile { background-color: #ffc107; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+        :root {
+            --primary: #0056b3;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #343a40;
+            --light: #f8f9fa;
+            --border: #dee2e6;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: var(--light); color: var(--dark); }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+        h1, h2, h3 { margin: 0 0 10px 0; }
+        
+        /* Tabs Framework */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .tab-btn { padding: 10px 20px; border: 1px solid transparent; background: none; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 4px 4px 0 0; }
+        .tab-btn.active { background: white; border: 1px solid var(--border); border-bottom-color: white; margin-bottom: -1px; color: var(--primary); }
+        .tab-content { display: none; background: white; padding: 20px; border-radius: 6px; border: 1px solid var(--border); min-height: 400px; }
+        .tab-content.active { display: block; }
+
+        /* Forms & Grid System */
+        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
         .form-group { margin-bottom: 15px; }
-        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
-        .registry-list { max-height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; }
-        .person-card { background: #fff; padding: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; }
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 2px 6px; cursor: pointer; }
-        .output-matrix { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .output-matrix th, .output-matrix td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input[type="text"], select, textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .checkbox-group input { width: 18px; height: 18px; }
+        button.btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button.btn-main:hover { background: #004085; }
+
+        /* Personnel Registry Styling */
+        .registry-container { max-height: 450px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; padding: 10px; background: var(--light); }
+        .person-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 4px; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .person-card.ops-capable { border-left-color: var(--success); }
+        .person-details div { font-size: 12px; color: #666; margin-top: 3px; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        /* Configuration Panel */
+        .config-box { background: var(--light); padding: 15px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+
+        /* Schedule Matrix Output Table */
+        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 12px; text-align: left; font-size: 14px; }
+        .matrix-table th { background-color: #f1f3f5; font-weight: bold; }
+        .matrix-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .shift-tag { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; }
+        .tag-ops { background-color: #e67e22; }
+        .tag-sts2 { background-color: #2980b9; }
+        .tag-sts3 { background-color: #8e44ad; }
+        .tag-standard { background-color: #7f8c8d; }
+        .tag-absent { background-color: var(--danger); }
     </style>
 </head>
 <body>
-    <header><h2>STARS Operational Rota Dashboard</h2><button id="compileBtn" class="btn-compile">⚡ Compile</button></header>
-    <div class="grid-container">
-        <div class="panel">
-            <h3>Register Personnel</h3>
-            <div class="form-group"><input type="text" id="fullName" placeholder="Full Name"></div>
-            <div class="form-group"><select id="mandatoryReq"><option>Anytime</option><option>Mornings</option><option>Lates</option></select></div>
-            <div class="form-group"><button id="addProfileBtn" style="background:var(--primary);color:white;border:none;padding:10px;width:100%;">Add</button></div>
-            <div id="registryList" class="registry-list"></div>
+
+    <header>
+        <h1>STARS Operational Rota Dashboard</h1>
+        <button id="globalCompileBtn" class="btn-main" style="background: var(--success); font-size: 16px; padding: 12px 25px;">⚡ Compile Rota Grid</button>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('rota-tab')">📅 Rota Matrix Generator</button>
+        <button class="tab-btn" onclick="switchTab('personnel-tab')">👥 Manage Personnel</button>
+    </div>
+
+    <!-- TAB 1: ROTA GENERATOR -->
+    <div id="rota-tab" class="tab-content active">
+        <div class="config-box">
+            <h3 style="width:100%; margin:0 0 5px 0;">Rota Options & Constraints</h3>
+            <div class="checkbox-group">
+                <input type="checkbox" id="reqFridayLates">
+                <label for="reqFridayLates">Are Friday Lates Required?</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="reqSts2Sim4">
+                <label for="reqSts2Sim4">Require STS2 SIM 4 (1845Z-2145Z)?</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="reqSts3Sim4">
+                <label for="reqSts3Sim4">Require STS3 SIM 4 (1930Z-2230Z)?</label>
+            </div>
         </div>
-        <div class="panel">
-            <h3>Absences</h3>
-            <textarea id="absenceInput" placeholder="One name per line"></textarea>
-            <div id="matrixTableWrapper"></div>
+
+        <div class="grid-2">
+            <div>
+                <h3>1. Input STARS Absences</h3>
+                <p style="font-size:12px; color:#666; margin-top:-5px;">Paste text rows containing names of people who are on leave/courses here (One name per line):</p>
+                <textarea id="absenceInput" rows="12" placeholder="Example:&#10;John Doe&#10;Jane Smith"></textarea>
+            </div>
+            <div>
+                <h3>2. Daily Generated Rota</h3>
+                <div id="matrixOutputContainer">
+                    <p style="color:#666; font-style:italic;">Configure personnel and click "Compile Rota Grid" to build the matrix...</p>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- TAB 2: PERSONNEL MANAGEMENT -->
+    <div id="personnel-tab" class="tab-content">
+        <div class="grid-2">
+            <div>
+                <h3>Register Roster Personnel</h3>
+                <div class="form-group">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" placeholder="e.g. John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="mandatoryReq">Mandatory Shift Requirement (Hard Restriction):</label>
+                    <select id="mandatoryReq">
+                        <option value="Anytime">Anytime Operational</option>
+                        <option value="Mornings">Required Mornings Only</option>
+                        <option value="Lates">Required Lates Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="softPref">Soft Preference Choice:</label>
+                    <select id="softPref">
+                        <option value="None">No Preference</option>
+                        <option value="Early">Prefers Early Shifts</option>
+                        <option value="Late">Prefers Late Shifts</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="isOpsTrained">
+                    <label for="isOpsTrained">Certified Ops Trained</label>
+                </div>
+                <button id="addProfileBtn" class="btn-main" style="width:100%; margin-top:10px;">Add Profile to System</button>
+            </div>
+            <div>
+                <h3>Active Registry (<span id="registryCount">0</span> Active)</h3>
+                <div id="registryList" class="registry-container"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let rosterPersonnel = [];
+        // Core data store. Prepopulated with mock staff data for initialization.
+        let roster = JSON.parse(localStorage.getItem('stars_roster')) || [
+            { id: 1, name: "Alex Mercer", mandatory: "Anytime", preference: "Early", opsTrained: true },
+            { id: 2, name: "Sarah Connor", mandatory: "Mornings", preference: "None", opsTrained: true },
+            { id: 3, name: "John Diggle", mandatory: "Lates", preference: "Late", opsTrained: false },
+            { id: 4, name: "Elena Fisher", mandatory: "Anytime", preference: "Late", opsTrained: true },
+            { id: 5, name: "Bruce Wayne", mandatory: "Anytime", preference: "None", opsTrained: false },
+            { id: 6, name: "Clark Kent", mandatory: "Mornings", preference: "Early", opsTrained: false },
+            { id: 7, name: "Diana Prince", mandatory: "Anytime", preference: "None", opsTrained: true },
+            { id: 8, name: "Barry Allen", mandatory: "Anytime", preference: "Early", opsTrained: false },
+            { id: 9, name: "Arthur Curry", mandatory: "Lates", preference: "Late", opsTrained: false },
+            { id: 10, name: "Victor Stone", mandatory: "Anytime", preference: "None", opsTrained: true },
+            { id: 11, name: "Hal Jordan", mandatory: "Anytime", preference: "Early", opsTrained: false }
+        ];
+
+        const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Personnel Management Logic
         document.getElementById('addProfileBtn').addEventListener('click', () => {
-            const name = document.getElementById('fullName').value;
-            if(name) {
-                rosterPersonnel.push({id: Date.now(), name, mandatory: document.getElementById('mandatoryReq').value});
-                updateUI();
-                document.getElementById('fullName').value = '';
-            }
-        });
-        document.getElementById('compileBtn').addEventListener('click', compileRota);
-        function updateUI() {
-            const list = document.getElementById('registryList');
-            list.innerHTML = '';
-            rosterPersonnel.forEach(p => {
-                list.innerHTML += `<div class="person-card"><span>${p.name}</span><button class="btn-delete" onclick="deleteP(${p.id})">X</button></div>`;
-            });
-        }
-        function deleteP(id) {
-            rosterPersonnel = rosterPersonnel.filter(p => p.id !== id);
-            updateUI();
-        }
-        function compileRota() {
-            const abs = document.getElementById('absenceInput').value.split('\n');
-            const available = rosterPersonnel.filter(p => !abs.includes(p.name));
-            let table = '<table class="output-matrix"><tr><th>Ops</th><th>Lates</th></tr>';
-            available.forEach(p => table += `<tr><td>${p.name}</td><td>${p.mandatory}</td></tr>`);
-            document.getElementById('matrixTableWrapper').innerHTML = table + '</table>';
-        }
-    </script>
-</body>
-</html>
